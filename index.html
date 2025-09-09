@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Loompa-Like — Rounds v4 (Fixed 2)</title>
+  <style>
+    :root{
+      --bg:#180824; --bg2:#2a0f40; --muted:#ffd9ff; --text:#fff7ff;
+      --accent:#7c3aed; --accent2:#ff7ac6; --good:#50fa7b; --bad:#ff5555; --gold:#f3c96b;
+      --panel:#0d1230;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%}
+    body{margin:0;font-family:ui-rounded, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      color:var(--text);
+      background: linear-gradient(135deg, var(--bg), var(--bg2));
+      -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+    }
+    .wrap{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .app{width:min(100%,1100px);}
+    .frame{background:var(--panel);border:1px solid rgba(255,255,255,0.12);border-radius:26px;padding:20px;box-shadow:0 16px 40px rgba(0,0,0,0.35)}
+    h1{margin:0 0 12px;font-size:clamp(26px,5vw,44px);color:var(--gold);text-shadow:0 2px 0 rgba(0,0,0,0.25), 0 0 18px rgba(243,201,107,0.35)}
+    h2{margin:0 0 10px}
+    p{margin:0 0 10px}
+    .muted{color:var(--muted)}
+    .row{display:flex;gap:16px;flex-wrap:wrap}
+    .btn{appearance:none;border:none;background:linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0) 40%), linear-gradient(135deg,var(--accent),var(--accent2));color:white;padding:14px 18px;border-radius:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 18px rgba(124,58,237,0.35), inset 0 -6px 10px rgba(0,0,0,0.15);transition:transform .06s ease, filter .2s, opacity .2s;touch-action:manipulation}
+    .btn:active{transform:translateY(1px)}
+    .btn.secondary{background:linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0) 40%), linear-gradient(135deg,#5b2a9a,#3b1b6e);border:1px solid rgba(255,255,255,0.22)}
+    .btn.good{background:linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0) 40%), linear-gradient(135deg,#34d399,#10b981)}
+    .btn.warn{background:linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0) 40%), linear-gradient(135deg,#ffd166,#f59e0b)}
+    .btn.bad{background:linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0) 40%), linear-gradient(135deg,#ff7676,#e11d48)}
+    .field{display:grid;gap:6px}
+    label{font-size:14px;color:#ffe3ff}
+    input[type="text"], select, input[type="number"]{width:100%;padding:14px 12px;border-radius:14px;border:1px solid rgba(255,255,255,0.18);background:linear-gradient(180deg, #3b174f, #2a113d);color:var(--text);font-size:16px;box-shadow:inset 0 2px 10px rgba(0,0,0,0.25)}
+    .players{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+    .card{border:1px solid rgba(255,255,255,0.18);padding:14px;border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))}
+    .nameBtn{padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.18);background:linear-gradient(180deg,#f7de95,#e4b851);color:#3b2405;font-weight:900;cursor:pointer}
+    .nameBtn:disabled{opacity:.6;cursor:not-allowed}
+    .numbers{display:grid;grid-template-columns:repeat(10, minmax(0,1fr));gap:8px}
+    .num{aspect-ratio:1/1;border-radius:12px;border:1px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 120% at 30% 20%, rgba(255,255,255,0.6), rgba(255,255,255,0) 30%), linear-gradient(135deg,#8a5cf6,#ff7ac6);color:#ffffff;font-weight:900;cursor:pointer;user-select:none; touch-action: manipulation;box-shadow:0 8px 18px rgba(0,0,0,0.35), inset 0 -8px 12px rgba(0,0,0,0.25);text-shadow:0 2px 6px rgba(0,0,0,0.35)}
+    .num.used{opacity:.4;filter:saturate(0.3);cursor:not-allowed}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .footer{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap}
+    .chips{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.25);background:#1c1342}
+    .list{display:grid;gap:8px}
+    .tag{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;border:1px solid rgba(0,0,0,0.18);background:rgba(255,255,255,0.5);color:#2b1a02}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:50;padding:24px}
+    .overlay-card{background:var(--panel);border:1px solid rgba(255,255,255,0.15);border-radius:22px;padding:20px;max-width:640px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+  </style>
+</head>
+<body>
+  <div class="wrap"><div class="app frame" id="app"></div></div>
+  <div id="errorOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);color:#fff;display:none;align-items:center;justify-content:center;padding:24px;z-index:9999"><pre id="errorText" style="white-space:pre-wrap;word-break:break-word;max-width:1000px"></pre></div>
+  <script>
+  (function(){
+    window.onerror = function(message, source, lineno, colno, error){
+      var overlay = document.getElementById('errorOverlay');
+      var text = document.getElementById('errorText');
+      text.textContent = 'An error occurred:\n' + (message || '') + '\n' + (error && error.stack ? error.stack : '');
+      overlay.style.display = 'flex';
+    };
+    if(!window.crypto){ window.crypto = {}; }
+    if(!window.crypto.getRandomValues){
+      window.crypto.getRandomValues = function(arr){
+        for(var i=0;i<arr.length;i++){ arr[i] = Math.floor(Math.random()*256); }
+        return arr;
+      };
+    }
+    if(!window.crypto.randomUUID){
+      window.crypto.randomUUID = function(){
+        var bytes = new Uint8Array(16);
+        window.crypto.getRandomValues(bytes);
+        bytes[6] = (bytes[6] & 0x0f) | 0x40;
+        bytes[8] = (bytes[8] & 0x3f) | 0x80;
+        var hex = []; for(var i=0;i<bytes.length;i++){ var b = bytes[i].toString(16); hex.push((b.length===1?'0':'')+b); }
+        var s = hex.join('');
+        return s.slice(0,8)+'-'+s.slice(8,12)+'-'+s.slice(12,16)+'-'+s.slice(16,20)+'-'+s.slice(20);
+      };
+    }
+  })();
+
+  function $(s, el){ return (el||document).querySelector(s); }
+  function $$(s, el){ return Array.prototype.slice.call((el||document).querySelectorAll(s)); }
+
+  var LOCK_SECONDS = 120;
+
+  var State = {
+    phase: 'setup',
+    players: [],
+    roundIndex: 0,
+    numbers: [],
+    usedThisRound: [],
+    winners: [],
+    lastWinner: null
+  };
+
+  function save(){ try{ localStorage.setItem('loompa_rounds_v4_fixed2', JSON.stringify(State)); }catch(e){} }
+  function load(){
+    try{
+      var raw = localStorage.getItem('loompa_rounds_v4_fixed2');
+      if(!raw) return;
+      var obj = JSON.parse(raw);
+      Object.assign(State, obj);
+      if(!Array.isArray(State.usedThisRound)) State.usedThisRound = [];
+    }catch(e){}
+  }
+  load();
+
+  function render(){
+    var root = $('#app');
+    root.innerHTML = '';
+
+    var top = document.createElement('div');
+    top.className='topbar';
+    var h = document.createElement('h1'); h.textContent='🍭 Loompa-Like — Rounds';
+    var reset = document.createElement('button'); reset.className='btn secondary'; reset.textContent='Reset';
+    reset.onclick=function(){
+      if(confirm('Reset tournament?')){
+        State = { phase:'setup', players:[], roundIndex:0, numbers:[], usedThisRound:[], winners:[], lastWinner:null };
+        save(); render();
+      }
+    };
+    top.appendChild(h); top.appendChild(reset); root.appendChild(top);
+
+    if(State.phase==='setup'){ viewSetup(root); return; }
+    if(State.phase==='chooseNumbers'){ viewChooseNumbers(root); return; }
+    if(State.phase==='roundIntro'){ viewRoundIntro(root); return; }
+    if(State.phase==='play'){ viewPlay(root); return; }
+    if(State.phase==='roundCongrats'){ viewRoundCongrats(root); return; }
+    if(State.phase==='end'){ viewEnd(root); return; }
+  }
+
+  function activePlayers(){ return State.players.filter(function(p){ return p.active; }); }
+
+  function viewSetup(root){
+    var box = document.createElement('div'); box.className='row';
+    var left = document.createElement('div'); left.style.flex='1 1 320px';
+    left.innerHTML = '<h2>Tournament Setup</h2><p class="muted">Up to 10 players. Each round ends when someone enters the pre-set number; that player escapes. Continue until only <strong>one</strong> player remains (the loser).</p>';
+    var right = document.createElement('div'); right.style.flex='2 1 520px'; right.innerHTML='<h2>Players</h2><div class="players" id="pwrap"></div>';
+    box.appendChild(left); box.appendChild(right); root.appendChild(box);
+
+    var pwrap = $('#pwrap');
+    for(var i=0;i<10;i++){
+      var div = document.createElement('div'); div.className='card';
+      div.innerHTML = '<div class="field"><label>Player '+(i+1)+'</label><input type="text" id="p_'+i+'" placeholder="Enter name (optional)" /></div>';
+      pwrap.appendChild(div);
+    }
+
+    var foot = document.createElement('div'); foot.className='footer';
+    var start = document.createElement('button'); start.className='btn good'; start.textContent='Continue: Pre-set Numbers';
+    start.onclick=function(){
+      var names = [];
+      for(var i=0;i<10;i++){
+        var el = $('#p_'+i);
+        var val = (el && el.value || '').trim();
+        if(val) names.push(val);
+      }
+      if(names.length < 2){ alert('Enter at least 2 player names (up to 10).'); return; }
+      State.players = names.map(function(n){ return {id:crypto.randomUUID(), name:n, active:true, lockUntil:0}; });
+      State.roundIndex = 0;
+      State.numbers = [];
+      State.usedThisRound = [];
+      State.winners = [];
+      State.lastWinner = null;
+      State.phase='chooseNumbers'; save(); render();
+    };
+    foot.appendChild(start); root.appendChild(foot);
+  }
+
+  function requiredRounds(){ return Math.max(0, activePlayers().length - 1); }
+
+  function viewChooseNumbers(root){
+    var req = requiredRounds();
+    var div = document.createElement('div');
+    div.innerHTML = '<h2>Choose Round Numbers</h2><p class="muted">Select <strong>'+req+'</strong> numbers (1–100) in the exact order of rounds. Each round ends immediately when someone enters that round\'s number. That player escapes; the rest continue.</p>';
+    root.appendChild(div);
+
+    var chips = document.createElement('div'); chips.className='chips'; chips.id='chosenChips';
+    State.numbers.forEach(function(n,i){
+      var c = document.createElement('span'); c.className='chip'; c.textContent = (i+1)+': '+n; chips.appendChild(c);
+    });
+    root.appendChild(chips);
+
+    var grid = document.createElement('div'); grid.className='numbers';
+    for(var n=1;n<=100;n++){
+      (function(n){
+        var btn = document.createElement('button'); btn.type='button'; btn.className='num';
+        if(State.numbers.indexOf(n)!==-1) btn.classList.add('used');
+        btn.textContent=n;
+        btn.disabled = State.numbers.indexOf(n)!==-1;
+        btn.onclick=function(){
+          if(State.numbers.length >= req){ alert('You\'ve already selected '+req+' numbers. Remove last if needed.'); return; }
+          State.numbers.push(n);
+          save(); viewChooseNumbers(root);
+        };
+        grid.appendChild(btn);
+      })(n);
+    }
+    var existing = $('.numbers', root); if(existing) existing.parentNode.replaceChild(grid, existing); else root.appendChild(grid);
+
+    var foot = document.createElement('div'); foot.className='footer';
+    var undo = document.createElement('button'); undo.className='btn secondary'; undo.textContent='Remove Last';
+    undo.onclick=function(){ if(State.numbers.length){ State.numbers.pop(); save(); viewChooseNumbers(root); } };
+    var start = document.createElement('button'); start.className='btn good'; start.textContent='Start Game';
+    start.onclick=function(){
+      if(State.numbers.length !== req){ alert('Please select exactly '+req+' numbers.'); return; }
+      State.roundIndex = 0;
+      State.usedThisRound = [];
+      State.phase='roundIntro'; save(); render();
+    };
+    foot.appendChild(undo); foot.appendChild(start);
+    root.appendChild(foot);
+  }
+
+  function currentTarget(){ return State.numbers[State.roundIndex]; }
+
+  function viewRoundIntro(root){
+    var totalRounds = State.numbers.length;
+    var rn = State.roundIndex + 1;
+    var div = document.createElement('div');
+    div.innerHTML = '<h2>Round '+rn+' of '+totalRounds+'</h2><p class="muted">Players remaining: '+activePlayers().length+'. Secret number is set. Tap start when you\'re ready.</p>';
+    root.appendChild(div);
+
+    var foot = document.createElement('div'); foot.className='footer';
+    var start = document.createElement('button'); start.className='btn good'; start.textContent='Start Round';
+    start.onclick=function(){
+      State.players.forEach(function(p){ if(p.active){ p.lockUntil = 0; } });
+      State.usedThisRound = [];
+      State.phase='play';
+      save(); render();
+    };
+    foot.appendChild(start);
+    root.appendChild(foot);
+  }
+
+  function viewPlay(root){
+    var rn = State.roundIndex + 1;
+    var div = document.createElement('div');
+    div.innerHTML = '<h2>Round '+rn+'</h2><p class="muted">Tap a player\'s name to let them guess. Incorrect guesses lock that player for 2 minutes. Round ends instantly when someone enters the correct number.</p>';
+    root.appendChild(div);
+
+    var list = document.createElement('div'); list.className='players';
+    var now = Date.now();
+    activePlayers().forEach(function(p){
+      var card = document.createElement('div'); card.className='card';
+      var btn = document.createElement('button'); btn.className='nameBtn'; btn.textContent = p.name;
+      var locked = p.lockUntil && p.lockUntil > now;
+      btn.disabled = !!locked;
+      btn.onclick=function(){ if(locked){ return; } openGuess(p); };
+      var status = document.createElement('div');
+      if(locked){
+        var s = Math.ceil((p.lockUntil - now)/1000);
+        status.innerHTML = '<span class="tag">⏳ Locked: '+s+'s</span>';
+      }else{
+        status.innerHTML = '<span class="tag">Ready</span>';
+      }
+      card.appendChild(btn);
+      card.appendChild(status);
+      list.appendChild(card);
+    });
+    root.appendChild(list);
+
+    if(!window.__roundTick){
+      window.__roundTick = setInterval(function(){
+        if(State.phase==='play'){ render(); } else { clearInterval(window.__roundTick); window.__roundTick=null; }
+      }, 1000);
+    }
+  }
+
+  function openGuess(player){
+    if(window.__roundTick){ clearInterval(window.__roundTick); window.__roundTick = null; }
+    var now = Date.now();
+    if(player.lockUntil && player.lockUntil > now){
+      alert(player.name+' is locked. Please wait.');
+      render(); return;
+    }
+    var root = $('#app');
+    root.innerHTML = '';
+    var top = document.createElement('div'); top.className='topbar';
+    var h = document.createElement('h2'); h.textContent = player.name+': Pick a Number';
+    var back = document.createElement('button'); back.className='btn secondary'; back.textContent='Back'; back.onclick=function(){ render(); };
+    top.appendChild(h); top.appendChild(back); root.appendChild(top);
+
+    var grid = document.createElement('div'); grid.className='numbers';
+    for(var n=1;n<=100;n++){
+      (function(n){
+        var used = State.usedThisRound.indexOf(n)!==-1;
+        var btn = document.createElement('button'); btn.type='button'; btn.className='num';
+        if(used) btn.classList.add('used');
+        btn.disabled = used;
+        btn.textContent = n;
+        btn.onclick=function(){ handleGuess(player, n); };
+        grid.appendChild(btn);
+      })(n);
+    }
+    root.appendChild(grid);
+  }
+
+  function handleGuess(player, n){
+    var target = currentTarget();
+    if(n === target){
+      var p = State.players.find(function(x){return x.id===player.id;});
+      if(p){ p.active = false; p.lockUntil = 0; }
+      State.winners.push({ round: State.roundIndex+1, name: player.name, number: n });
+      State.lastWinner = { name: player.name, number: n, round: State.roundIndex+1 };
+      State.usedThisRound = [];
+      if(activePlayers().length <= 1 || State.roundIndex >= State.numbers.length-1){
+        State.phase='end';
+      }else{
+        State.phase='roundCongrats';
+      }
+      save(); render();
+    }else{
+      if(State.usedThisRound.indexOf(n)===-1) State.usedThisRound.push(n);
+      var p = State.players.find(function(x){return x.id===player.id;});
+      if(p){ p.lockUntil = Date.now() + LOCK_SECONDS*1000; }
+      alert(player.name+' guessed '+n+'. Incorrect. Locked for '+LOCK_SECONDS+' seconds.');
+      save();
+      render();
+    }
+  }
+
+  function viewRoundCongrats(root){
+    var w = State.lastWinner || {name:'', number:'', round: State.roundIndex+1};
+    var div = document.createElement('div');
+    div.className = 'overlay';
+    var card = document.createElement('div');
+    card.className = 'overlay-card';
+    card.innerHTML = '<h2>Round '+w.round+' Complete</h2>' +
+      '<p class="muted">✨ Congratulations to <strong>'+w.name+'</strong> — escaped with number <strong>'+w.number+'</strong>!</p>' +
+      '<p class="muted">Players remaining: '+activePlayers().length+'.</p>';
+    var foot = document.createElement('div'); foot.className='footer';
+    var next = document.createElement('button'); next.className='btn good'; next.textContent='Start Next Round';
+    next.onclick = function(){
+      if(activePlayers().length <= 1 || State.roundIndex >= State.numbers.length-1){
+        State.phase='end';
+      } else {
+        State.roundIndex += 1;
+        State.phase='roundIntro';
+      }
+      save(); render();
+    };
+    foot.appendChild(next);
+    card.appendChild(foot);
+    div.appendChild(card);
+    root.appendChild(div);
+  }
+
+  function viewEnd(root){
+    var remaining = activePlayers();
+    var loserName = remaining.length ? remaining[0].name : '—';
+    var winnersList = State.winners.map(function(w){ return 'R'+w.round+': '+w.name+' ('+w.number+')'; }).join(', ');
+
+    var div = document.createElement('div');
+    div.innerHTML = '<h2>Final Results</h2>' +
+      '<p class="muted">All but one player escaped.</p>' +
+      '<p><strong>Loser:</strong> '+loserName+'</p>' +
+      '<p class="muted">Winners who escaped: '+(winnersList || '—')+'</p>';
+    root.appendChild(div);
+
+    var foot = document.createElement('div'); foot.className='footer';
+    var reset = document.createElement('button'); reset.className='btn good'; reset.textContent='Play Again';
+    reset.onclick=function(){ if(confirm('Reset tournament?')){ State = { phase:'setup', players:[], roundIndex:0, numbers:[], usedThisRound:[], winners:[], lastWinner:null }; save(); render(); } };
+    foot.appendChild(reset);
+    root.appendChild(foot);
+  }
+
+  document.addEventListener('DOMContentLoaded', render);
+  </script>
+</body>
+</html>
